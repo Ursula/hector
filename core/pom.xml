@@ -1,9 +1,13 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
+  <!--  First install test jar  -->
+  <!-- mvn install:install-file -Dfile='hector-test-1.1-41.jar' -DgroupId=org.hectorclient -DartifactId=hector-test -Dversion=1.1-41 -Dpackaging=jar -->
+  <!-- mvn install:install-file -Dfile='hector-core-1.1-41.jar' -DgroupId=org.hectorclient -DartifactId=hector-core -Dversion=1.1-41 -Dpackaging=jar -->
+  
   <parent>
     <groupId>org.hectorclient</groupId>
     <artifactId>hector</artifactId>
-    <version>1.1-4</version>
+    <version>1.1-41</version>
   </parent>
   
   <artifactId>hector-core</artifactId>

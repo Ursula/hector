@@ -1,11 +1,13 @@
 package me.prettyprint.cassandra.model;
 
+import java.nio.ByteBuffer;
 import java.util.Arrays;
 
 import me.prettyprint.cassandra.model.thrift.ThriftConverter;
 import me.prettyprint.cassandra.model.thrift.ThriftFactory;
 import me.prettyprint.cassandra.serializers.TypeInferringSerializer;
 import me.prettyprint.cassandra.service.*;
+import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Keyspace;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
@@ -18,6 +20,7 @@ import me.prettyprint.hector.api.mutation.Mutator;
 import org.apache.cassandra.thrift.Cassandra;
 import org.apache.cassandra.thrift.Deletion;
 import org.apache.cassandra.thrift.SlicePredicate;
+import org.apache.cassandra.thrift.SliceRange;
 
 
 
@@ -43,6 +46,8 @@ public final class MutatorImpl<K> implements Mutator<K> {
   private BatchMutation<K> pendingMutations;
   
   private BatchSizeHint sizeHint;
+  
+  private HConsistencyLevel consistency;
 
   public MutatorImpl(Keyspace keyspace, Serializer<K> keySerializer, BatchSizeHint sizeHint) {
     this.keyspace = (ExecutingKeyspace) keyspace;
@@ -60,6 +65,16 @@ public final class MutatorImpl<K> implements Mutator<K> {
 
   public MutatorImpl(Keyspace keyspace, BatchSizeHint sizeHint) {
     this(keyspace, TypeInferringSerializer.<K> get(), sizeHint);
+  }
+  
+  @Override
+  public HConsistencyLevel getConsistencyLevel() {
+	  return this.consistency;
+  }
+
+  @Override
+  public void setConsistencyLevel(HConsistencyLevel level) {
+	  this.consistency = level;
   }
   
   // Simple and immediate insertion of a column
@@ -108,7 +123,7 @@ public final class MutatorImpl<K> implements Mutator<K> {
             supercolumnName, columnName, sNameSerializer, nameSerializer));
         return null;
       }
-    }));
+    }, consistency));
   }  
   
   @Override
@@ -123,7 +138,7 @@ public final class MutatorImpl<K> implements Mutator<K> {
               ThriftFactory.createSuperColumnPath(cf, supercolumnName, sNameSerializer));
           return null;
         }
-      }));
+      }, consistency));
   }
   
   /**
@@ -224,6 +239,26 @@ public final class MutatorImpl<K> implements Mutator<K> {
     } else { 
       d = new Deletion().setTimestamp(clock);
     }
+    getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
+    return this;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public <N> Mutator<K> addDeletion(K key, String cf, N columnNameStart, N columnNameFinish, Serializer<N> nameSerializer) {
+    return addDeletion(key, cf, columnNameStart, columnNameFinish, nameSerializer, keyspace.createClock());
+  }
+  
+  /**
+   * {@inheritDoc}
+   */
+  @Override
+  public <N> Mutator<K> addDeletion(K key, String cf, N columnNameStart, N columnNameFinish, Serializer<N> nameSerializer, long clock) {
+    SlicePredicate sp = new SlicePredicate();
+    sp.setSlice_range(new SliceRange(nameSerializer.toByteBuffer(columnNameStart), nameSerializer.toByteBuffer(columnNameFinish), false, Integer.MAX_VALUE));
+    Deletion d = new Deletion().setTimestamp(clock).setPredicate(sp);
     getPendingMutations().addDeletion(key, Arrays.asList(cf), d);
     return this;
   }

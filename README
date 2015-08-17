@@ -1,9 +1,31 @@
+
+
+THIS PROJECT IS NO LONGER ACTIVE
+
+Please use the official java-driver at https://github.com/datastax/java-driver/ for all Java-based Apache Cassandra projects.  
+
+My most sincere thanks to the other project collaborators and the many people that contributed features, bugs and patches over the years. 
+
+@zznate
+nate@thelastpickle.com
+
+-------------------
+
+
+
+
+
+
+
+Original README for posterity
+-----------
+
 The currently active branch is 1.0. The master tracks Apache Cassandra active development which is 1.1.x presently. Current releases on the downloads section should be cosidered production ready. You should always choose the most recent release for your version of Apache Cassandra.
 
 For the impatient: 
 http://hector-client.github.com/hector/build/html/index.html
 
-All Hector artificats are deployed to Maven Central. If you use maven for your build system, you need only include the hector-core dependency and all related dependencies will be managed automatically. 
+All Hector artifacts are deployed to Maven Central. If you use maven for your build system, you need only include the hector-core dependency and all related dependencies will be managed automatically. 
 ----------------------------------------------------------------------------------------------------
 
 Hector is a high level Java client for Apache Cassandra.

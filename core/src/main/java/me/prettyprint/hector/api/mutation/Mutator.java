@@ -1,5 +1,6 @@
 package me.prettyprint.hector.api.mutation;
 
+import me.prettyprint.hector.api.HConsistencyLevel;
 import me.prettyprint.hector.api.Serializer;
 import me.prettyprint.hector.api.beans.HColumn;
 import me.prettyprint.hector.api.beans.HCounterColumn;
@@ -19,6 +20,10 @@ import me.prettyprint.hector.api.beans.HSuperColumn;
  */
 public interface Mutator<K> {
 
+  public HConsistencyLevel getConsistencyLevel();
+  
+  public void setConsistencyLevel(HConsistencyLevel level);
+	  
   // Simple and immediate insertion of a column
   <N, V> MutationResult insert(final K key, final String cf, final HColumn<N, V> c);
 
@@ -133,6 +138,33 @@ public interface Mutator<K> {
    * @return a mutator
    */
   <N> Mutator<K> addDeletion(K key, String cf, N columnName, Serializer<N> nameSerializer, long clock);
+
+  /**
+   * Adds a Range-Deletion to the underlying batch_mutate call.
+   *
+   * @param <N> column name type
+   * @param key row key
+   * @param cf column family
+   * @param columnNameStart starting column name. Cannot be null.
+   * @param columnNameFinish end column name. Cannot be null.
+   * @param nameSerializer a name serializer
+   * @return a mutator
+   */
+  <N> Mutator<K> addDeletion(K key, String cf, N columnNameStart, N columnNameFinish, Serializer<N> nameSerializer);
+
+  /**
+   * Adds a Range-Deletion to the underlying batch_mutate call.
+   *
+   * @param <N> column name type
+   * @param key row key
+   * @param cf column family
+   * @param columnNameStart starting column name. Cannot be null.
+   * @param columnNameFinish end column name. Cannot be null.
+   * @param nameSerializer a name serializer
+   * @param clock custom clock to use in the deletion
+   * @return a mutator
+   */
+  <N> Mutator<K> addDeletion(K key, String cf, N columnNameStart, N columnNameFinish, Serializer<N> nameSerializer, long clock);
 
   
   <SN,N,V> Mutator<K> addSubDelete(K key, String cf, HSuperColumn<SN,N,V> sc);
